@@ -5,11 +5,15 @@ import os
 import pydeck as pdk
 import altair as alt
 from datetime import datetime, timedelta
+import folium
+from streamlit_folium import folium_static
+import json
+from geojson import load
 
 # Data loading functions
 def load_admin_boundary(admin_level):
-    # Map admin level to file name
-    level_map = {
+    # Map admin levels to file names
+    admin_files = {
         "Admin Level 0": "adm0.geojson",
         "Admin Level 1": "adm1.geojson",
         "Admin Level 2": "adm2.geojson",
@@ -18,20 +22,34 @@ def load_admin_boundary(admin_level):
     }
     
     base_path = "/Users/majju/Downloads/UNTechWeek/data/boundaries/Bangladesh_Latest_-_Global_Administrative_Boundaries"
-    file_path = os.path.join(base_path, level_map[admin_level])
+    file_name = admin_files.get(admin_level)
     
-    # For adm0 and adm1, load the actual files
-    if admin_level in ["Admin Level 0", "Admin Level 1"]:
-        if os.path.exists(file_path):
-            gdf = gpd.read_file(file_path)
-            # Convert to EPSG:4326 if not already
-            if gdf.crs != "EPSG:4326":
-                gdf = gdf.to_crs("EPSG:4326")
-            return gdf
+    if not file_name:
+        st.error(f"Invalid admin level: {admin_level}")
         return None
-    else:
-        # For adm2, adm3, and adm4, return a placeholder message
-        st.warning(f"⚠️ {admin_level} data is not available in this version. Please use Admin Level 0 or Admin Level 1 for analysis.")
+        
+    file_path = os.path.join(base_path, file_name)
+    
+    try:
+        if not os.path.exists(file_path):
+            if admin_level in ["Admin Level 2", "Admin Level 3", "Admin Level 4"]:
+                st.warning(f"Data for {admin_level} is not available in the current version.")
+                return None
+            else:
+                st.error(f"File not found: {file_path}")
+                return None
+                
+        # Read the GeoJSON file using geojson
+        with open(file_path, 'r') as f:
+            geojson_data = json.load(f)
+            
+        # Convert to GeoDataFrame
+        gdf = gpd.GeoDataFrame.from_features(geojson_data["features"])
+        
+        return gdf
+        
+    except Exception as e:
+        st.error(f"Error loading {admin_level} boundary: {str(e)}")
         return None
 
 def load_cyclone_track():
