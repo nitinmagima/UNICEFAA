@@ -1,0 +1,36 @@
+# Large data files
+data/boundaries/Bangladesh_Latest_-_Global_Administrative_Boundaries/adm3.geojson
+data/boundaries/Bangladesh_Latest_-_Global_Administrative_Boundaries/adm4.geojson
+data/boundaries/Bangladesh_Latest_-_Global_Administrative_Boundaries.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db 
