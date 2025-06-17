@@ -1,7 +1,9 @@
 streamlit==1.32.0
 pandas==2.2.0
 geopandas==0.14.3
-folium==0.15.2
+folium==0.14.0
 streamlit-folium==0.15.1
 branca==0.7.0
-numpy==1.26.4 
+numpy==1.26.4
+fiona==1.9.5
+shapely==2.0.3 
