@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 def load_admin_boundary(admin_level):
     # Map admin level to file name
     level_map = {
+        "Admin Level 0": "adm0.geojson",
         "Admin Level 1": "adm1.geojson",
         "Admin Level 2": "adm2.geojson",
         "Admin Level 3": "adm3.geojson",
@@ -18,13 +19,20 @@ def load_admin_boundary(admin_level):
     
     base_path = "/Users/majju/Downloads/UNTechWeek/data/boundaries/Bangladesh_Latest_-_Global_Administrative_Boundaries"
     file_path = os.path.join(base_path, level_map[admin_level])
-    if os.path.exists(file_path):
-        gdf = gpd.read_file(file_path)
-        # Convert to EPSG:4326 if not already
-        if gdf.crs != "EPSG:4326":
-            gdf = gdf.to_crs("EPSG:4326")
-        return gdf
-    return None
+    
+    # For adm0 and adm1, load the actual files
+    if admin_level in ["Admin Level 0", "Admin Level 1"]:
+        if os.path.exists(file_path):
+            gdf = gpd.read_file(file_path)
+            # Convert to EPSG:4326 if not already
+            if gdf.crs != "EPSG:4326":
+                gdf = gdf.to_crs("EPSG:4326")
+            return gdf
+        return None
+    else:
+        # For adm2, adm3, and adm4, return a placeholder message
+        st.warning(f"⚠️ {admin_level} data is not available in this version. Please use Admin Level 0 or Admin Level 1 for analysis.")
+        return None
 
 def load_cyclone_track():
     track_path = "/Users/majju/Downloads/UNTechWeek/data/boundaries/CyclonePath/amphan_2020_track.geojson"
@@ -46,7 +54,7 @@ col1, col2 = st.columns([0.85, 0.15])
 with col2:
     st.image("assets/UNICEF_Logo.png", width=150)
 
-st.title("Defining Risk and Establishing A Crisis Timeline")
+st.title("Defining Cyclone Risk")
 
 # Create tabs for the main sections
 hazard_tab, exposure_tab = st.tabs([
@@ -79,13 +87,15 @@ with hazard_tab:
         # — 2. Admin level dropdown —
         admin_level = st.selectbox(
             "Select Admin level",
-            ["Admin Level 1", "Admin Level 2", "Admin Level 3", "Admin Level 4"]
+            ["Admin Level 0", "Admin Level 1", "Admin Level 2", "Admin Level 3", "Admin Level 4"]
         )
 
         # — 3. Load boundary data —
         boundary_gdf = load_admin_boundary(admin_level)
         if boundary_gdf is None:
-            st.error(f"Could not load {admin_level} boundary data. Please ensure the data file exists.")
+            if admin_level in ["Admin Level 0", "Admin Level 1"]:
+                st.error(f"Could not load {admin_level} boundary data. Please ensure the data file exists.")
+            # For other levels, the warning is already shown in load_admin_boundary
 
         # — 4. Load cyclone track —
         track_df = load_cyclone_track()
